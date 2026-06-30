@@ -832,7 +832,7 @@
 
             init() {
                 if (!localStorage.getItem('mp_users')) localStorage.setItem('mp_users', JSON.stringify(SEED_USERS));
-                if (!localStorage.getItem('mp_perfumes')) localStorage.setItem('mp_perfumes', JSON.stringify(SEED_PERFUMES));
+                localStorage.setItem('mp_perfumes', JSON.stringify(SEED_PERFUMES));
                 if (!localStorage.getItem('mp_breakages')) localStorage.setItem('mp_breakages', JSON.stringify([]));
                 
                 if (!localStorage.getItem('mp_sales') || JSON.parse(localStorage.getItem('mp_sales')).length === 0) {
