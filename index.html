@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maison De Parfum — Système Centralisé Cloud</title>
+    <style>
+        /* ==========================================================================
+           VARIABLES & LUXURY GRAPHICS THEME
+           ========================================================================== */
+        :root {
+            --bg-main: #0a0a0a;
+            --bg-card: #121212;
+            --bg-input: #1a1a1a;
+            --color-gold: #d4af37;
+            --color-gold-hover: #f1c40f;
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+            --border-color: #262626;
+            --color-danger: #e74c3c;
+            --color-success: #2ecc71;
+            --color-info: #3498db;
+        }
+
+        /* Light Mode Theme Variant */
+        body.light-mode {
+            --bg-main: #f9f9f9;
+            --bg-card: #ffffff;
+            --bg-input: #f0f0f0;
+            --color-gold: #af8f2c;
+            --color-gold-hover: #917522;
+            --text-main: #1a1a1a;
+            --text-muted: #666666;
+            --border-color: #e0e0e0;
+        }
+        .menu-icon{
+            width:25px;
+            height:25px;
+            margin-right:10px;
+            vertical-align:middle;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
+        .hidden { display: none !important; }
+        
+        /* TOAST SYSTEM */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 99999; max-width: 400px; }
+        .toast { background-color: #161616; padding: 1.2rem; margin-bottom: 12px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); animation: slideIn 0.3s ease forwards; }
+        body.light-mode .toast { background-color: #ffffff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .toast.success { border-left: 5px solid var(--color-success); background-color: #122417; color: #fff; }
+        body.light-mode .toast.success { background-color: #e8f8f0; color: #122417; }
+        .toast.info { border-left: 5px solid var(--color-info); background-color: #121f2c; color: #fff; }
+        body.light-mode .toast.info { background-color: #e6f2ff; color: #121f2c; }
+        .toast.danger { border-left: 5px solid var(--color-danger); background-color: #2c1515; color: #fff; }
+        body.light-mode .toast.danger { background-color: #ffebe6; color: #2c1515; }
+        .toast-title { font-weight: bold; margin-bottom: 5px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* INTERFACE SPA LAYOUT */
+        .login-viewport { display: flex; min-height: 100vh; }
+        .login-hero { flex: 1.2; background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(20,20,20,0.9) 100%); display: flex; align-items: center; justify-content: center; padding: 4rem; border-right: 1px solid var(--border-color); }
+        body.light-mode .login-hero { background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%); }
+        .login-hero-content h1 { font-size: 3.5rem; font-weight: 300; margin-bottom: 1rem; letter-spacing: -1px; }
+        .login-hero-content span { color: var(--color-gold); letter-spacing: 4px; font-size: 0.85rem; text-transform: uppercase; }
+        .login-form-wrapper { flex: 0.8; background-color: var(--bg-card); display: flex; align-items: center; justify-content: center; padding: 4rem; }
+        
+        /* SPECIFIC LOGIN BOX FIX */
+        .login-box-container { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 2rem; border-radius: 4px; width: 100%; max-width: 380px; }
+        .login-box-container h2 { font-size: 2rem; margin-bottom: 2rem; font-weight: 400; }
+        
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; }
+        .form-input { width: 100%; padding: 1rem; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-main); font-size: 1rem; }
+        .form-input:focus { outline: none; border-color: var(--color-gold); }
+        .select-premium { width: 100%; padding: 0.8rem; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-main); font-size: 1rem; }
+        
+        .btn-premium { width: 100%; padding: 1rem; background-color: var(--color-gold); color: #000; border: none; border-radius: 4px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.3s; text-align: center; }
+        body.light-mode .btn-premium { color: #fff; }
+        .btn-premium:hover { background-color: var(--color-gold-hover); transform: translateY(-1px); }
+
+        .app-layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background-color: var(--bg-card); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; transition: transform 0.3s ease; }
+        .sidebar-brand { padding: 2rem 1.5rem; border-bottom: 1px solid var(--border-color); text-align: center; }
+        .sidebar-brand h2 { font-size: 1.4rem; font-weight: 300; letter-spacing: 1px; }
+        .sidebar-brand span { color: var(--color-gold); font-size: 0.75rem; letter-spacing: 2px; }
+        
+        .sidebar-menu { flex: 1; padding: 1.5rem 0; }
+        .menu-item { display: block; padding: 0.8rem 1.5rem; color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; transition: 0.2s; }
+        .menu-item:hover, .menu-item.active { color: var(--text-main); background-color: var(--bg-input); border-left: 4px solid var(--color-gold); }
+        
+        .sidebar-footer { padding: 1.5rem; border-top: 1px solid var(--border-color); }
+        .user-tag { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+
+        .main-viewport { flex: 1; padding: 2.5rem; overflow-y: auto; position: relative; }
+        
+        /* TOP NAV CONTROL WITH BELL ICON */
+        .top-action-bar { display: flex; justify-content: flex-end; align-items: center; gap: 20px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .bell-btn, .theme-toggle-btn { position: relative; background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--color-gold); transition: 0.2s; }
+        .bell-btn:hover, .theme-toggle-btn:hover { color: var(--text-main); }
+        .bell-badge { position: absolute; top: -5px; right: -5px; background-color: var(--color-danger); color: white; font-size: 0.7rem; font-weight: bold; padding: 2px 6px; border-radius: 50%; }
+
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; flex-wrap: wrap; gap: 15px; }
+        .page-title h1 { font-size: 2rem; font-weight: 400; }
+        .page-title p { color: var(--text-muted); font-size: 0.9rem; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .stat-card { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 4px; }
+        .stat-card p { font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); }
+        .stat-card h3 { font-size: 1.8rem; margin: 0.5rem 0; color: var(--color-gold); }
+
+        .table-wrapper { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 4px; overflow-x: auto; margin-top: 1rem; margin-bottom: 2rem; }
+        .premium-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; min-width: 500px; }
+        .premium-table th { padding: 1rem; background-color: var(--bg-input); color: var(--text-muted); font-weight: 500; border-bottom: 1px solid var(--border-color); }
+        .premium-table td { padding: 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+        .premium-table tr:hover { background-color: rgba(255,255,255,0.02); }
+        body.light-mode .premium-table tr:hover { background-color: rgba(0,0,0,0.02); }
+
+        /* METHOD BADGES STYLE */
+        .badge-method { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
+        .badge-cash { background-color: #2ecc71; color: #000; }
+        .badge-tpe { background-color: #3498db; color: #fff; }
+        .badge-breakage { background-color: #e74c3c; color: #fff; }
+
+        .chart-box { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 4px; margin-bottom: 2rem; position: relative; }
+        .dashboard-double-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; }
+
+        /* ==========================================================================
+           POS SYSTEM: GRID & STICKY CART STRATEGY
+           ========================================================================== */
+        .pos-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 2rem; align-items: start; position: relative; }
+        .matrix-grid { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 2rem; align-items: start; }
+        .product-catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+        .pos-product-card { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 4px; display: flex; flex-direction: column; justify-content: space-between; min-height: 160px; }
+        .pos-product-card h4 { font-size: 1.1rem; margin-bottom: 0.3rem; }
+        .pos-product-card p { color: var(--color-gold); font-weight: 600; margin-bottom: 0.5rem; }
+        
+        .qty-control-block { display: flex; align-items: center; gap: 5px; margin-top: auto; }
+        .qty-field { width: 60px; padding: 0.4rem; background-color: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); text-align: center; border-radius: 4px; }
+
+        /* FIXED/STICKY CART ON DESKTOP */
+        .cart-wrapper { background-color: var(--bg-card); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 4px; display: flex; flex-direction: column; min-height: 480px; position: sticky; top: 20px; z-index: 100; max-height: calc(100vh - 80px); overflow-y: auto; transition: bottom 0.4s ease, opacity 0.3s ease; }
+        .cart-items-list { flex: 1; overflow-y: auto; margin: 1rem 0; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+        .cart-totals { border-top: 1px solid var(--border-color); padding-top: 1rem; margin-bottom: 1rem; }
+        .total-row { display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 600; color: var(--color-gold); }
+        
+        /* RADIO CONTAINER FOR PAYMENT METHOD */
+        .payment-selector-container { border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 4px; margin-bottom: 1rem; background-color: var(--bg-input); }
+        .payment-radio-group { display: flex; gap: 20px; margin-top: 0.4rem; }
+        .payment-radio-group label { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; cursor: pointer; color: var(--text-main); }
+        .payment-radio-group input { accent-color: var(--color-gold); width: 16px; height: 16px; }
+
+        /* FLOATING ACTION TRIGGER BAR FOR MOBILE */
+        .mobile-cart-trigger { display: none; position: fixed; bottom: 85px; right: 20px; background-color: var(--color-gold); color: #000; padding: 12px 20px; border-radius: 30px; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 15px rgba(212,175,55,0.4); border: none; cursor: pointer; z-index: 1001; align-items: center; gap: 8px; }
+        body.light-mode .mobile-cart-trigger { color: #fff; }
+
+        .search-container { margin-bottom: 1.5rem; }
+
+        /* NOTIFICATIONS ARCHIVES */
+        .notif-log-item { padding: 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; border-radius: 4px; margin-bottom: 8px; }
+        .notif-log-item.success { background-color: rgba(46,204,113,0.1); border-left: 4px solid var(--color-success); }
+        .notif-log-item.info { background-color: rgba(52,152,219,0.1); border-left: 4px solid var(--color-info); }
+        .notif-log-item.danger { background-color: rgba(231,76,60,0.1); border-left: 4px solid var(--color-danger); }
+
+        /* INTERACTIVE SVG CHART TOOLTIP */
+        .chart-interactive-point { fill: var(--color-gold); cursor: pointer; transition: r 0.2s, fill 0.2s; }
+        .chart-interactive-point:hover { fill: var(--text-main); r: 7; }
+        .premium-chart-tooltip { position: absolute; background: #161616; border: 1px solid var(--color-gold); padding: 8px 12px; border-radius: 4px; font-size: 0.85rem; color: #fff; pointer-events: none; opacity: 0; transition: opacity 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.5); z-index: 1000; }
+        body.light-mode .premium-chart-tooltip { background: #ffffff; color: #1a1a1a; }
+
+        /* ==========================================================================
+           RESPONSIVE RE-ENGINEERING & MOBILE SPECIAL HANDLING
+           ========================================================================== */
+        @media (max-width: 1024px) {
+            .app-layout { flex-direction: column; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); position: fixed; bottom: 0; left: 0; right: 0; z-index: 2000; height: 65px; background: #0f0f0f; box-shadow: 0 -4px 20px rgba(0,0,0,0.8); }
+            body.light-mode .sidebar { background: #ffffff; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
+            .sidebar-brand { display: none; }
+            .sidebar-menu { display: flex; flex-direction: row; padding: 0; justify-content: space-around; align-items: center; height: 100%; width: 100%; }
+            .menu-item { padding: 0.5rem; font-size: 1.1rem; text-align: center; flex-direction: column; gap: 4px; border-left: none !important; border-top: 3px solid transparent; width: 100%; height: 100%; justify-content: center; }
+            .menu-item span { display: none !important; }
+            
+            /* FORCE SHOW THE EMOJI OR COMPACT LABEL FOR DISCONNECT SO IT IS VISIBLE */
+            #menu-logout { display: flex !important; align-items: center; justify-content: center; color: var(--color-danger) !important; }
+            
+            .menu-item:hover, .menu-item.active { border-top: 3px solid var(--color-gold); background-color: rgba(255,255,255,0.02); border-left: none; }
+            body.light-mode .menu-item:hover, body.light-mode .menu-item.active { background-color: rgba(0,0,0,0.02); }
+            .sidebar-footer { display: none; }
+            
+            .main-viewport { padding: 1.5rem 1.5rem 160px 1.5rem; }
+            .dashboard-double-columns { grid-template-columns: 1fr; gap: 1.5rem; }
+
+            /* TRANSFORM CART VIEWPORT ON MOBILE TO AN OVERLAY ACCORDION PANEL */
+            .pos-grid { grid-template-columns: 1fr; }
+            .matrix-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+            
+            /* TARGET ONLY THE COMMERCIAL CART INDEPENDENTLY FROM PRODUCT FORMS */
+            #main-cart-wrapper.cart-wrapper { position: fixed; bottom: -100%; left: 0; right: 0; width: 100%; height: 75vh; background-color: var(--bg-card); border-radius: 20px 20px 0 0; border: 1px solid var(--border-color); border-bottom: none; z-index: 3000; padding: 1.5rem; margin-top: 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.9); opacity: 0; pointer-events: none; }
+            body.light-mode #main-cart-wrapper.cart-wrapper { box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
+            #main-cart-wrapper.cart-wrapper.mobile-open { bottom: 0; opacity: 1; pointer-events: auto; }
+            
+            /* ENSURE FORM AND MATRIX REMAIN BLOCK STATIC FOR CLEAN SCROLL ON MOBILE */
+            .matrix-form-box.cart-wrapper { position: static; min-height: auto; max-height: none; opacity: 1; pointer-events: auto; }
+
+            .mobile-cart-trigger { display: flex; }
+            .cart-close-header { display: flex !important; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; margin-bottom: 0.5rem; }
+        }
+
+        @media (max-width: 768px) {
+            .login-viewport { flex-direction: column; }
+            .login-hero { padding: 2.5rem 1.5rem; text-align: center; }
+            .login-hero-content h1 { font-size: 2.2rem; }
+            .login-form-wrapper { padding: 2.5rem 1.5rem; }
+            .page-header { flex-direction: column; align-items: flex-start; }
+            .top-action-bar { justify-content: space-between; width: 100%; margin-top: 0.5rem; }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .page-title h1 { font-size: 1.6rem; }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Scripts Firebase SDK essential to Sync data Cloud -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <button id="cart-float-btn" class="mobile-cart-trigger" style="display: none;">
+        🛒 Panier (<span id="cart-floating-counter">0</span>)
+    </button>
+
+    <div id="view-login" class="login-viewport">
+        <div class="login-hero">
+            <div class="login-hero-content">
+                <span>HAUTE PARFUMERIE</span>
+                <h1>Maison De Parfum</h1>
+                <p style="color: var(--text-muted); max-width: 450px;">Console d'administration exécutive et terminaux commerciaux POS.</p>
+            </div>
+        </div>
+        <div class="login-form-wrapper">
+            <div class="login-box-container">
+                <h2>Connexion Portail</h2>
+                <form id="loginForm" onsubmit="CoreApp.handleAuth(event)">
+                    <div class="form-group">
+                        <label>Email Professionnel</label>
+                        <input type="email" id="loginEmail" class="form-input" placeholder="ex: admin@maison.ma" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mot de passe</label>
+                        <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn-premium">Initialiser la Session ↗</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-workspace" class="app-layout hidden">
+        <div class="sidebar">
+            <div class="sidebar-brand">
+                <h2>Maison De Parfum</h2>
+                <span>CONTRÔLE CENTRAL</span>
+            </div>
+            <div class="sidebar-menu">
+                <a href="#" id="menu-dashboard" class="menu-item" onclick="CoreApp.switchPage('dashboard')"> <img src="DASHBORD.png" class="menu-icon"> <span>Dashboard</span></a>
+                <a href="#" id="menu-sales" class="menu-item" onclick="CoreApp.switchPage('sales')"> <img src="SELE.png" class="menu-icon"> <span>POS</span></a>
+                <a href="#" id="menu-inventory" class="menu-item" onclick="CoreApp.switchPage('inventory')"> <img src="STOCK.png" class="menu-icon"> <span>Stock</span></a>
+                <a href="#" id="menu-products" class="menu-item" onclick="CoreApp.switchPage('products')"> <img src="AJOUTER.png" class="menu-icon"> <span>Matrice</span></a>
+                <a href="#" id="menu-notifs" class="menu-item" onclick="CoreApp.switchPage('notifs')"> <img src="NOTIFICATION.png" class="menu-icon"> <span>Notifs</span></a>
+                <a href="#" id="menu-history" class="menu-item" onclick="CoreApp.switchPage('history')"> <img src="HISTORIQUE.png" class="menu-icon"> <span>Journaux</span></a>
+                <a href="#" id="menu-settings" class="menu-item" onclick="CoreApp.switchPage('settings')"> <img src="PARA.png" class="menu-icon"> <span>Config</span></a>
+                <a href="#" id="menu-logout" class="menu-item" onclick="CoreApp.logout()"> <img src="LOGOUT.png" class="menu-icon"> <span>Déconnexion</span></a>
+            </div>
+            <div class="sidebar-footer">
+                <div>
+                    <div id="session-user-name" class="user-tag" style="color: var(--text-main); font-weight:600;">Utilisateur</div>
+                    <div id="session-user-role" class="user-tag">Grade</div>
+                </div>
+                <button onclick="CoreApp.logout()" class="btn-premium" style="padding: 0.5rem 1rem; font-size: 0.85rem; width: auto; margin-top: 0.5rem;">Déconnexion ↩</button>
+            </div>
+        </div>
+
+        <div class="main-viewport">
+            
+            <div class="top-action-bar">
+                <button class="theme-toggle-btn" onclick="CoreApp.toggleTheme()" title="Changer de thème">
+                    🌓
+                </button>
+                <button class="bell-btn" onclick="CoreApp.switchPage('notifs')" title="Centre de notifications">
+                     <img src="NOTIFICATION.png" class="menu-icon"> <span id="bell-counter" class="bell-badge">0</span>
+                </button>
+                <button onclick="CoreApp.requestGooglePermissions()" class="btn-premium" style="width:auto; padding:0.4rem 0.8rem; font-size:0.8rem; background-color:var(--bg-input); color:var(--color-gold); border:1px solid var(--border-color);">Activer Google Notifications 📱</button>
+            </div>
+            
+            <div id="page-dashboard" class="page-pane hidden">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h1>Tableau de Bord Exécutif</h1>
+                        <p>Analyse financière avancée, historique d'approvisionnement et flux de ventes.</p>
+                    </div>
+                </div>
+
+                <!-- DATE RANGE FILTER FOR DASHBOARD -->
+                <div class="cart-wrapper matrix-form-box" style="position: static; max-height: none; min-height: auto; margin-bottom: 1.5rem; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; background-color: rgba(212,175,55,0.03);">
+                    <div class="form-group" style="margin-bottom:0; flex: 1; min-width: 140px;">
+                        <label>Date Début</label>
+                        <input type="date" id="dash-filter-start" class="form-input">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0; flex: 1; min-width: 140px;">
+                        <label>Date Fin</label>
+                        <input type="date" id="dash-filter-end" class="form-input">
+                    </div>
+                    <button onclick="CoreApp.renderDashboard()" class="btn-premium" style="width: auto; padding: 0.9rem 1.5rem;">Filtrer l'Analyse 🔍</button>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card"><p>Chiffre d'Affaires</p><h3 id="stat-revenue">0.00 DH</h3></div>
+                    <div class="stat-card"><p>Marge Bénéficiaire</p><h3 id="stat-profit">0.00 DH</h3></div>
+                    <div class="stat-card"><p>Transactions</p><h3 id="stat-sales-count">0</h3></div>
+                    <div class="stat-card"><p>Volume Stock Entré</p><h3 id="stat-stock-added">0 Unités</h3></div>
+                </div>
+
+                <div class="chart-box">
+                    <h3 style="margin-bottom: 1rem; font-weight:400; color: var(--color-gold);">Tendances Analytiques de la Période</h3>
+                    <div id="dashboard-svg-chart-container"></div>
+                    <div id="chart-tooltip" class="premium-chart-tooltip"></div>
+                </div>
+
+                <div class="dashboard-double-columns">
+                    <div>
+                        <h3 style="font-weight:400; margin-bottom:0.5rem; color:var(--color-gold);">📜 Journaux des Ventes</h3>
+                        <div class="table-wrapper">
+                            <table class="premium-table">
+                                <thead><tr><th>Date & Heure</th><th>Opérateur</th><th>Mode</th><th>Total</th></tr></thead>
+                                <tbody id="dash-sales-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="font-weight:400; margin-bottom:0.5rem; color:var(--color-danger);">💥 Pertes / Flacons Brisés</h3>
+                        <div class="table-wrapper">
+                            <table class="premium-table">
+                                <thead><tr><th>Date</th><th>Parfum</th><th>Qté Perdue</th><th>Coût de Perte</th></tr></thead>
+                                <tbody id="dash-breakages-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <h3 style="font-weight:400; margin-bottom:0.5rem; color:var(--color-success);">📥 Entrées de Stock Récentes</h3>
+                    <div class="table-wrapper">
+                        <table class="premium-table">
+                            <thead><tr><th>Date</th><th>Parfum</th><th>Qté Ajoutée</th><th>Déclaré Par</th></tr></thead>
+                            <tbody id="dash-arrivals-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-sales" class="page-pane hidden">
+                <div class="page-header"><div class="page-title"><h1>Terminal Point de Vente</h1><p>Gerez les encaissements clients.</p></div></div>
+                <div class="pos-grid">
+                    <div>
+                        <div class="search-container">
+                            <input type="text" id="pos-search-input" class="form-input" placeholder="🔍 Rechercher par nom de parfum ou par marque..." oninput="CoreApp.renderPOS()">
+                        </div>
+                        <h3 style="margin-bottom: 1rem; font-weight:400;">Catalogue de Parfums</h3>
+                        <div id="pos-catalog-container" class="product-catalog-grid"></div>
+                    </div>
+                    
+                    <div id="main-cart-wrapper" class="cart-wrapper">
+                        <div class="cart-close-header" style="display:none;">
+                            <h3 style="font-weight:400; color:var(--color-gold);">🛒 Votre Panier</h3>
+                            <button type="button" id="close-mobile-cart-btn" style="background:none; border:none; color:var(--color-danger); font-size:1.5rem; font-weight:bold; cursor:pointer; padding: 5px;">✕ Fermer</button>
+                        </div>
+                        <h3 class="desktop-only-title" style="font-weight:400; border-bottom:1px solid var(--border-color); padding-bottom:0.5rem;">Panier Commercial</h3>
+                        
+                        <div id="cart-items-container" class="cart-items-list"></div>
+                        
+                        <div class="cart-totals">
+                            <div class="total-row"><span>Total:</span><span id="cart-grand-total">0.00 DH</span></div>
+                        </div>
+
+                        <div class="payment-selector-container">
+                            <label style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Mode de Règlement</label>
+                            <div class="payment-radio-group">
+                                <label><input type="radio" name="pos-payment-method" value="cash" checked> 💵 ESPÈCES</label>
+                                <label><input type="radio" name="pos-payment-method" value="tpe"> 💳 TPE</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top:auto;">
+                            <label>Code PIN Personnel d'autorisation</label>
+                            <input type="password" id="sales-auth-pin" class="form-input" placeholder="Entrez votre PIN">
+                        </div>
+                        <button onclick="CoreApp.validateCartCheckout()" class="btn-premium">Valider & Imprimer le Ticket</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-inventory" class="page-pane hidden">
+                <div class="page-header">
+                    <div class="page-title"><h1>Contrôle des Stocks Logistiques</h1><p>Niveaux de réserve actifs et extraction des rapports.</p></div>
+                    <button onclick="CoreApp.exportInventoryToExcel()" class="btn-premium" style="width:auto; padding:0.8rem 1.5rem; background-color:#217346; color:#fff;">📄 Télécharger Fichier Excel (.xlsx)</button>
+                </div>
+                
+                <div class="cart-wrapper matrix-form-box" style="min-height: auto; margin-bottom:2rem; background-color:rgba(46,204,113,0.05); border-color:var(--color-success); position: static; max-height: none;">
+                    <h3 style="font-weight:400; color:var(--color-success); margin-bottom:1rem;">📥 Déclarer l'Arrivée d'un Nouveau Stock</h3>
+                    <div class="form-group" style="margin-bottom:1rem;">
+                        <input type="text" id="inventory-search-dropdown-input" class="form-input" placeholder="Taper le nom pour filtrer le menu déroulant..." oninput="CoreApp.populatePerfumeDropdown()">
+                    </div>
+                    <form id="stockArrivalForm" onsubmit="CoreApp.handleStockArrival(event)" style="display:flex; gap:15px; align-items:flex-end; flex-wrap:wrap;">
+                        <div class="form-group" style="flex:1; min-width:200px; margin-bottom:0;"><select id="arrival-perfume-select" class="select-premium"></select></div>
+                        <div class="form-group" style="width:150px; margin-bottom:0;"><input type="number" id="arrival-qty" class="form-input" min="1" placeholder="Qté" required></div>
+                        <button type="submit" class="btn-premium" style="width:auto; padding:0.9rem 2rem; background-color:var(--color-success);">Enregistrer l'Entrée</button>
+                    </form>
+                </div>
+
+                <!-- NEW: ADMIN SECTION FOR BROKEN PERFUMES (Pertes/Flacons Brisés) -->
+                <div id="admin-breakage-section" class="cart-wrapper matrix-form-box hidden" style="min-height: auto; margin-bottom:2rem; background-color:rgba(231,76,60,0.05); border-color:var(--color-danger); position: static; max-height: none;">
+                    <h3 style="font-weight:400; color:var(--color-danger); margin-bottom:1rem;">💥 Signaler un Flacon Brisé / Cassé (Pertes Admin)</h3>
+                    <div class="form-group" style="margin-bottom:1rem;">
+                        <input type="text" id="breakage-search-dropdown-input" class="form-input" placeholder="Taper le nom pour filtrer le parfum brisé..." oninput="CoreApp.populateBreakageDropdown()">
+                    </div>
+                    <form id="stockBreakageForm" onsubmit="CoreApp.handleStockBreakage(event)" style="display:flex; gap:15px; align-items:flex-end; flex-wrap:wrap;">
+                        <div class="form-group" style="flex:1; min-width:200px; margin-bottom:0;"><select id="breakage-perfume-select" class="select-premium"></select></div>
+                        <div class="form-group" style="width:150px; margin-bottom:0;"><input type="number" id="breakage-qty" class="form-input" min="1" placeholder="Qté" required></div>
+                        <button type="submit" class="btn-premium" style="width:auto; padding:0.9rem 2rem; background-color:var(--color-danger); color:#fff;">Déclarer la Perte</button>
+                    </form>
+                </div>
+
+                <div class="search-container">
+                    <input type="text" id="inventory-table-search-input" class="form-input" placeholder="Taper la marque ou le nom complet pour filtrer le tableau..." oninput="CoreApp.renderInventory()">
+                </div>
+                <div class="table-wrapper">
+                    <table class="premium-table">
+                        <thead><tr><th>ID</th><th>Marque</th><th>Nom du Parfum</th><th>Stock Quantité</th></tr></thead>
+                        <tbody id="inventory-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="page-notifs" class="page-pane hidden">
+                <div class="page-header">
+                    <div class="page-title"><h1>Centre de Contrôle des Notifications 🔔</h1><p>Historique complet des événements.</p></div>
+                    <button onclick="CoreApp.clearNotifLogs()" class="btn-premium" style="width:auto; padding:0.5rem 1rem; background-color:var(--color-danger)">Effacer l'Archive</button>
+                </div>
+                <div id="notif-logs-archive-container" style="display:flex; flex-direction:column; gap:10px;"></div>
+            </div>
+
+            <div id="page-products" class="page-pane hidden">
+                <div class="page-header"><div class="page-title"><h1>Matrice du Catalogue</h1><p>Ajoutez de nouvelles références.</p></div></div>
+                <div class="matrix-grid">
+                    <div class="cart-wrapper matrix-form-box">
+                        <h3 style="font-weight:400; color:var(--color-gold); margin-bottom:1rem;">Ajoutez de nouvelles références</h3>
+                        <form id="addProductForm" onsubmit="CoreApp.handleCreateProduct(event)">
+                            <div class="form-group"><label>Nom du Parfum</label><input type="text" id="prod-name" class="form-input" required></div>
+                            <div class="form-group"><label>Marque</label><input type="text" id="prod-brand" class="form-input" required></div>
+                            <div class="form-group"><label>Prix d'Achat (DH)</label><input type="number" step="0.01" id="prod-price-buy" class="form-input" required></div>
+                            <div class="form-group"><label>Prix de Vente (DH)</label><input type="number" step="0.01" id="prod-price-sell" class="form-input" required></div>
+                            <div class="form-group"><label>Stock Initial</label><input type="number" id="prod-stock" class="form-input" required></div>
+                            <button type="submit" class="btn-premium">Insérer au Catalogue</button>
+                        </form>
+                    </div>
+                    <div class="table-wrapper" style="margin-top:0;">
+                        <table class="premium-table">
+                            <thead><tr><th>Parfum</th><th>Marque</th><th>Prix Vente</th><th>Stock</th></tr></thead>
+                            <tbody id="products-matrix-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-history" class="page-pane hidden">
+                <div class="page-header"><div class="page-title"><h1>Journaux des Transactions Globales</h1><p>Grand livre d'audit financier.</p></div></div>
+                <div class="table-wrapper">
+                    <table class="premium-table">
+                        <thead><tr><th>Date & Heure</th><th>Opérateur</th><th>Mode Règlement</th><th>Total Réalisé</th></tr></thead>
+                        <tbody id="history-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="page-settings" class="page-pane hidden">
+                <div class="page-header"><div class="page-title"><h1>Configuration Système</h1><p>Ajustement des seuils de sécurité.</p></div></div>
+                <div class="cart-wrapper matrix-form-box" style="max-width: 500px; position: static; max-height: none;">
+                    <div class="form-group">
+                        <label>Seuil d'alerte Stock Critique (Unités)</label>
+                        <input type="number" id="settings-threshold-input" class="form-input" value="5">
+                    </div>
+                    <button onclick="CoreApp.saveSettingsConfig()" class="btn-premium">Sauvegarder</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION FIREBASE CLOUD - ** BADAL HAD L-URL B DYALK LI SWBTI **
+        const firebaseConfig = {
+            databaseURL: "https://maisondeparfum-f216c-default-rtdb.europe-west1.firebasedatabase.app" 
+        };
+        
+        // Initialisation de Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const SEED_USERS = [
+            { id: "usr-admin", name: "Directeur Général", email: "admin@maison.ma", password: "admin123", role: "admin", personalCode: "A001" },
+            { id: "usr-op1", name: "Commercial", email: "operator1@maison.ma", password: "op123", role: "commercial", personalCode: "C001" }
+        ];
+
+        const DispatcherNotif = {
+            send(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const node = document.createElement('div');
+                node.className = `toast ${type}`;
+                let label = type === 'danger' ? '🔴 ALERTE STOCK' : type === 'success' ? '🟢 VENTE EFFECTUÉE' : '🔵 APPROVISIONNEMENT';
+                node.innerHTML = `<div class="toast-title">${label}</div><div class="toast-body">${message}</div>`;
+                container.appendChild(node);
+                setTimeout(() => { node.remove(); }, 8000);
+
+                db.ref('notif_logs').push({
+                    id: Date.now(),
+                    text: message,
+                    type: type,
+                    date: new Date().toLocaleString("fr-FR", { timeZone: "Africa/Casablanca", hour12: false }),
+                });
+
+                if (window.Notification && Notification.permission === "granted") {
+                    new Notification(label, { body: message });
+                }
+            }
+        };
+
+        const CoreApp = {
+            state: { activeUser: null, cart: [], currentPage: 'dashboard', perfumes: [], sales: [], arrivals: [], breakages: [], settingsThreshold: 5 },
+
+            init() {
+                if (localStorage.getItem('mp_theme') === 'light') {
+                    document.body.classList.add('light-mode');
+                }
+
+                // Écouteur Cloud Realtime (En temps réel) sur tout le système
+                db.ref().on('value', (snapshot) => {
+                    const data = snapshot.val() || {};
+                    
+                    // Synchronisation instantanée des listes globales
+                    CoreApp.state.perfumes = data.perfumes || [];
+                    CoreApp.state.sales = data.sales ? Object.values(data.sales) : [];
+                    CoreApp.state.arrivals = data.arrivals ? Object.values(data.arrivals) : [];
+                    CoreApp.state.breakages = data.breakages ? Object.values(data.breakages) : [];
+                    CoreApp.state.settingsThreshold = data.settingsThreshold || 5;
+
+                    // Si la base est totalement vide, on injecte les données de base (Première fois uniquement)
+                    if (CoreApp.state.perfumes.length === 0) {
+                        // Charger un échantillon rapide de parfums pour ne pas démarrer à blanc
+                        let initialPerfumes = [
+                            { id: "perf-1", brand: "DIOR F", name: "CINEMA", purchasePrice: 25.0, sellingPrice: 50.0, currentStock: 10 },
+                            { id: "perf-2", brand: "CHANEL", name: "COCO MLLE", purchasePrice: 25.0, sellingPrice: 50.0, currentStock: 12 },
+                            { id: "perf-3", brand: "YSL", name: "LIBRE", purchasePrice: 25.0, sellingPrice: 50.0, currentStock: 8 }
+                        ];
+                        db.ref('perfumes').set(initialPerfumes);
+                        return;
+                    }
+
+                    // Forcer le rafraîchissement visuel instantané de l'écran en cours
+                    CoreApp.refreshActiveViews();
+                });
+
+                const session = localStorage.getItem('mp_session');
+                if (session) {
+                    this.state.activeUser = JSON.parse(session);
+                    this.openWorkspace();
+                }
+
+                document.getElementById('cart-float-btn').addEventListener('click', () => {
+                    document.getElementById('main-cart-wrapper').classList.toggle('mobile-open');
+                });
+            },
+
+            refreshActiveViews() {
+                this.updateBellBadge();
+                this.populatePerfumeDropdown();
+                this.populateBreakageDropdown();
+                
+                if (this.state.currentPage === 'dashboard') this.renderDashboard();
+                if (this.state.currentPage === 'sales') this.renderPOS();
+                if (this.state.currentPage === 'inventory') this.renderInventory();
+                if (this.state.currentPage === 'products') this.renderProductsMatrix();
+                if (this.state.currentPage === 'history') this.renderHistory();
+                if (this.state.currentPage === 'notifs') this.renderNotifLogsView();
+            },
+
+            toggleTheme() {
+                if (document.body.classList.contains('light-mode')) {
+                    document.body.classList.remove('light-mode');
+                    localStorage.setItem('mp_theme', 'dark');
+                } else {
+                    document.body.classList.add('light-mode');
+                    localStorage.setItem('mp_theme', 'light');
+                }
+            },
+
+            requestGooglePermissions() {
+                if (!("Notification" in window)) {
+                    alert("Les notifications Google Web ne sont pas prises en charge.");
+                    return;
+                }
+                Notification.requestPermission().then(p => {
+                    if(p === 'granted') alert("Notifications Web activées ! 📱");
+                });
+            },
+
+            handleAuth(e) {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value.trim();
+                const pass = document.getElementById('loginPassword').value;
+
+                const match = SEED_USERS.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === pass);
+                if (!match) { alert("Identifiants de connexion invalides !"); return; }
+
+                localStorage.setItem('mp_session', JSON.stringify(match));
+                this.state.activeUser = match;
+                this.openWorkspace();
+            },
+
+            openWorkspace() {
+                document.getElementById('view-login').classList.add('hidden');
+                document.getElementById('view-workspace').classList.remove('hidden');
+                document.getElementById('session-user-name').innerText = this.state.activeUser.name;
+                document.getElementById('session-user-role').innerText = this.state.activeUser.role.toUpperCase();
+
+                if (this.state.activeUser.role !== 'admin') {
+                    document.getElementById('menu-dashboard').classList.add('hidden');
+                    document.getElementById('menu-products').classList.add('hidden');
+                    document.getElementById('menu-history').classList.add('hidden');
+                    document.getElementById('menu-settings').classList.add('hidden');
+                    document.getElementById('admin-breakage-section').classList.add('hidden');
+                    this.switchPage('sales');
+                } else {
+                    document.getElementById('menu-dashboard').classList.remove('hidden');
+                    document.getElementById('menu-products').classList.remove('hidden');
+                    document.getElementById('menu-history').classList.remove('hidden');
+                    document.getElementById('menu-settings').classList.remove('hidden');
+                    document.getElementById('admin-breakage-section').classList.remove('hidden');
+                    this.switchPage('dashboard');
+                }
+                this.refreshActiveViews();
+            },
+
+            switchPage(pageKey) {
+                this.state.currentPage = pageKey;
+                document.querySelectorAll('.page-pane').forEach(p => p.classList.add('hidden'));
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+
+                document.getElementById(`page-${pageKey}`).classList.remove('hidden');
+                const menuItem = document.getElementById(`menu-${pageKey}`);
+                if(menuItem) menuItem.classList.add('active');
+
+                const floatBtn = document.getElementById('cart-float-btn');
+                if(pageKey === 'sales') {
+                    floatBtn.style.display = (window.innerWidth <= 1024) ? 'flex' : 'none';
+                } else {
+                    floatBtn.style.display = 'none';
+                }
+
+                this.refreshActiveViews();
+            },
+
+            updateBellBadge() {
+                db.ref('notif_logs').limitToLast(10).once('value', snapshot => {
+                    const logs = snapshot.val() || {};
+                    document.getElementById('bell-counter').innerText = Object.keys(logs).length;
+                });
+            },
+
+            populatePerfumeDropdown() {
+                const select = document.getElementById('arrival-perfume-select');
+                if(!select) return;
+                const query = document.getElementById('inventory-search-dropdown-input')?.value.toLowerCase() || "";
+                select.innerHTML = "";
+                this.state.perfumes.forEach(p => {
+                    if(p.name.toLowerCase().includes(query) || p.brand.toLowerCase().includes(query)) {
+                        select.innerHTML += `<option value="${p.id}">${p.brand} - ${p.name} (Dispo: ${p.currentStock})</option>`;
+                    }
+                });
+            },
+
+            populateBreakageDropdown() {
+                const select = document.getElementById('breakage-perfume-select');
+                if(!select) return;
+                const query = document.getElementById('breakage-search-dropdown-input')?.value.toLowerCase() || "";
+                select.innerHTML = "";
+                this.state.perfumes.forEach(p => {
+                    if(p.name.toLowerCase().includes(query) || p.brand.toLowerCase().includes(query)) {
+                        select.innerHTML += `<option value="${p.id}">${p.brand} - ${p.name} (Dispo: ${p.currentStock})</option>`;
+                    }
+                });
+            },
+
+            handleStockArrival(e) {
+                e.preventDefault();
+                const pId = document.getElementById('arrival-perfume-select').value;
+                const qty = parseInt(document.getElementById('arrival-qty').value);
+                if(!pId) return;
+
+                let perfumes = [...this.state.perfumes];
+                let matched = perfumes.find(p => p.id === pId);
+                matched.currentStock += qty;
+
+                db.ref('perfumes').set(perfumes);
+                db.ref('arrivals').push({
+                    date: new Date().toLocaleString("fr-FR", { timeZone: "Africa/Casablanca" }).split(',')[0],
+                    name: matched.name,
+                    qty: qty,
+                    user: this.state.activeUser.name
+                });
+
+                DispatcherNotif.send(`Arrivage : +${qty} [ ${matched.name} ] par ${this.state.activeUser.name}`, "info");
+                document.getElementById('stockArrivalForm').reset();
+            },
+
+            handleStockBreakage(e) {
+                e.preventDefault();
+                const pId = document.getElementById('breakage-perfume-select').value;
+                const qty = parseInt(document.getElementById('breakage-qty').value);
+                if(!pId) return;
+
+                let perfumes = [...this.state.perfumes];
+                let matched = perfumes.find(p => p.id === pId);
+                if (matched.currentStock < qty) { alert("Stock insuffisant !"); return; }
+                
+                matched.currentStock -= qty;
+                const totalLossCost = matched.purchasePrice * qty;
+
+                db.ref('perfumes').set(perfumes);
+                db.ref('breakages').push({
+                    date: new Date().toLocaleString("fr-FR", { timeZone: "Africa/Casablanca" }).split(',')[0],
+                    name: matched.name,
+                    qty: qty,
+                    lossCost: totalLossCost,
+                    user: this.state.activeUser.name
+                });
+
+                DispatcherNotif.send(`Flacon Brisé : -${qty} [ ${matched.name} ] (Perte: ${totalLossCost} DH)`, "danger");
+                document.getElementById('stockBreakageForm').reset();
+            },
+
+            handleCreateProduct(e) {
+                e.preventDefault();
+                const name = document.getElementById('prod-name').value.trim();
+                const brand = document.getElementById('prod-brand').value.trim();
+                const buy = parseFloat(document.getElementById('prod-price-buy').value);
+                const sell = parseFloat(document.getElementById('prod-price-sell').value);
+                const stock = parseInt(document.getElementById('prod-stock').value);
+
+                let perfumes = [...this.state.perfumes];
+                const newId = "perf-" + (perfumes.length + 1);
+
+                perfumes.push({ id: newId, brand: brand, name: name, purchasePrice: buy, sellingPrice: sell, currentStock: stock });
+                db.ref('perfumes').set(perfumes);
+
+                DispatcherNotif.send(`Nouveau Parfum inséré : ${brand} - ${name} (Stock: ${stock})`, "info");
+                document.getElementById('addProductForm').reset();
+            },
+
+            renderDashboard() {
+                const startFilter = document.getElementById('dash-filter-start').value;
+                const endFilter = document.getElementById('dash-filter-end').value;
+
+                let filteredSales = this.state.sales.filter(s => {
+                    if (startFilter && s.date < startFilter) return false;
+                    if (endFilter && s.date > endFilter) return false;
+                    return true;
+                });
+
+                let filteredArrivals = this.state.arrivals.filter(a => {
+                    if (startFilter && a.date < startFilter) return false;
+                    if (endFilter && a.date > endFilter) return false;
+                    return true;
+                });
+
+                let filteredBreakages = this.state.breakages.filter(b => {
+                    if (startFilter && b.date < startFilter) return false;
+                    if (endFilter && b.date > endFilter) return false;
+                    return true;
+                });
+
+                let revenue = 0, profit = 0;
+                filteredSales.forEach(s => { revenue += s.total; profit += s.profit; });
+                
+                let totalLossCost = 0;
+                filteredBreakages.forEach(b => totalLossCost += b.lossCost);
+                profit -= totalLossCost;
+
+                let totalStockAdded = 0;
+                filteredArrivals.forEach(a => totalStockAdded += a.qty);
+
+                document.getElementById('stat-revenue').innerText = `${revenue.toFixed(2)} DH`;
+                document.getElementById('stat-profit').innerText = `${profit.toFixed(2)} DH`;
+                document.getElementById('stat-sales-count').innerText = filteredSales.length;
+                document.getElementById('stat-stock-added').innerText = `${totalStockAdded} Unités`;
+
+                // Render Logs Tables
+                const sBody = document.getElementById('dash-sales-body');
+                sBody.innerHTML = "";
+                filteredSales.slice(-5).reverse().forEach(s => {
+                    sBody.innerHTML += `<tr><td>${s.date}</td><td>${s.operator}</td><td><span class="badge-method badge-${s.method}">${s.method}</span></td><td>${s.total.toFixed(2)} DH</td></tr>`;
+                });
+
+                const bBody = document.getElementById('dash-breakages-body');
+                bBody.innerHTML = "";
+                filteredBreakages.slice(-5).reverse().forEach(b => {
+                    bBody.innerHTML += `<tr><td>${b.date}</td><td>${b.name}</td><td>${b.qty}</td><td style="color:var(--color-danger);">${b.lossCost.toFixed(2)} DH</td></tr>`;
+                });
+
+                const aBody = document.getElementById('dash-arrivals-body');
+                aBody.innerHTML = "";
+                filteredArrivals.slice(-5).reverse().forEach(a => {
+                    aBody.innerHTML += `<tr><td>${a.date}</td><td>${a.name}</td><td>+${a.qty}</td><td>${a.user}</td></tr>`;
+                });
+
+                this.renderMiniChart();
+            },
+
+            renderMiniChart() {
+                const container = document.getElementById('dashboard-svg-chart-container');
+                if(!container) return;
+                container.innerHTML = `
+                    <svg viewBox="0 0 500 100" style="width:100%; height:100px;">
+                        <path d="M10,80 Q150,20 300,50 T490,30" fill="none" stroke="var(--color-gold)" stroke-width="3"/>
+                        <circle cx="10" cy="80" r="5" class="chart-interactive-point"/>
+                        <circle cx="220" cy="38" r="5" class="chart-interactive-point"/>
+                        <circle cx="490" cy="30" r="5" class="chart-interactive-point"/>
+                    </svg>
+                `;
+            },
+
+            renderPOS() {
+                const container = document.getElementById('pos-catalog-container');
+                const search = document.getElementById('pos-search-input').value.toLowerCase();
+                container.innerHTML = "";
+
+                this.state.perfumes.forEach(p => {
+                    if (p.name.toLowerCase().includes(search) || p.brand.toLowerCase().includes(search)) {
+                        const isOut = p.currentStock <= 0;
+                        container.innerHTML += `
+                            <div class="pos-product-card" style="${isOut ? 'opacity:0.5;' : ''}">
+                                <div>
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">${p.brand}</span>
+                                    <h4>${p.name}</h4>
+                                    <p>${p.sellingPrice.toFixed(2)} DH</p>
+                                    <span style="font-size:0.8rem; color:${p.currentStock <= this.state.settingsThreshold ? 'var(--color-danger)' : 'var(--color-success)'}">Stock: ${p.currentStock}</span>
+                                </div>
+                                <div class="qty-control-block">
+                                    <input type="number" id="qty-field-${p.id}" class="qty-field" value="1" min="1" ${isOut ? 'disabled' : ''}>
+                                    <button onclick="CoreApp.addPerfumeToCart('${p.id}')" class="btn-premium" style="padding:0.4rem; font-size:0.85rem;" ${isOut ? 'disabled' : ''}>+ Ajouter</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                this.renderCartView();
+            },
+
+            addPerfumeToCart(pId) {
+                const perfume = this.state.perfumes.find(p => p.id === pId);
+                const inputQty = parseInt(document.getElementById(`qty-field-${pId}`).value);
+
+                if (inputQty > perfume.currentStock) { alert("Quantité demandée supérieure au stock disponible !"); return; }
+
+                const existing = this.state.cart.find(item => item.id === pId);
+                if (existing) {
+                    if((existing.qty + inputQty) > perfume.currentStock) { alert("Limite du stock atteinte !"); return; }
+                    existing.qty += inputQty;
+                } else {
+                    this.state.cart.push({ id: pId, brand: perfume.brand, name: perfume.name, price: perfume.sellingPrice, purchasePrice: perfume.purchasePrice, qty: inputQty });
+                }
+                this.renderPOS();
+            },
+
+            renderCartView() {
+                const container = document.getElementById('cart-items-container');
+                container.innerHTML = "";
+                let grandTotal = 0;
+                let count = 0;
+
+                this.state.cart.forEach((item, index) => {
+                    const rowTotal = item.price * item.qty;
+                    grandTotal += rowTotal;
+                    count += item.qty;
+
+                    container.innerHTML += `
+                        <div class="cart-item">
+                            <div>
+                                <strong>${item.name}</strong><br>
+                                <small>${item.qty} x ${item.price.toFixed(2)} DH</small>
+                            </div>
+                            <button onclick="CoreApp.removeCartItem(${index})" style="background:none; border:none; color:var(--color-danger); cursor:pointer;">Retirer</button>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('cart-grand-total').innerText = `${grandTotal.toFixed(2)} DH`;
+                document.getElementById('cart-floating-counter').innerText = count;
+            },
+
+            removeCartItem(index) {
+                this.state.cart.splice(index, 1);
+                this.renderPOS();
+            },
+
+            validateCartCheckout() {
+                if (this.state.cart.length === 0) { alert("Le panier est vide !"); return; }
+                const pin = document.getElementById('sales-auth-pin').value;
+                if (pin !== this.state.activeUser.personalCode) { alert("Code PIN incorrect !"); return; }
+
+                let perfumes = [...this.state.perfumes];
+                let totalBill = 0;
+                let totalProfit = 0;
+
+                // Mettre à jour les stocks globaux
+                this.state.cart.forEach(item => {
+                    let target = perfumes.find(p => p.id === item.id);
+                    target.currentStock -= item.qty;
+                    totalBill += (item.price * item.qty);
+                    totalProfit += ((item.price - item.purchasePrice) * item.qty);
+                });
+
+                const method = document.querySelector('input[name="pos-payment-method"]:checked').value;
+
+                // Sauvegarde direct f Firebase Cloud
+                db.ref('perfumes').set(perfumes);
+                db.ref('sales').push({
+                    date: new Date().toLocaleString("fr-FR", { timeZone: "Africa/Casablanca", hour12: false }),
+                    operator: this.state.activeUser.name,
+                    method: method,
+                    total: totalBill,
+                    profit: totalProfit
+                });
+
+                DispatcherNotif.send(`Vente validée par ${this.state.activeUser.name}: Total ${totalBill.toFixed(2)} DH (${method.toUpperCase()})`, "success");
+                
+                this.state.cart = [];
+                document.getElementById('sales-auth-pin').value = "";
+                this.renderPOS();
+                
+                alert("Ticket validé avec succès ! Les stocks sont à jour sur tous les écrans.");
+            },
+
+            renderInventory() {
+                const tbody = document.getElementById('inventory-table-body');
+                const search = document.getElementById('inventory-table-search-input').value.toLowerCase();
+                tbody.innerHTML = "";
+
+                this.state.perfumes.forEach(p => {
+                    if(p.name.toLowerCase().includes(search) || p.brand.toLowerCase().includes(search)) {
+                        const crit = p.currentStock <= this.state.settingsThreshold;
+                        tbody.innerHTML += `
+                            <tr style="${crit ? 'background-color:rgba(231,76,60,0.05);' : ''}">
+                                <td>${p.id}</td>
+                                <td>${p.brand}</td>
+                                <td><strong>${p.name}</strong></td>
+                                <td style="font-weight:600; color:${crit ? 'var(--color-danger)' : 'var(--text-main)'}">${p.currentStock} Unités</td>
+                            </tr>
+                        `;
+                    }
+                });
+            },
+
+            renderProductsMatrix() {
+                const tbody = document.getElementById('products-matrix-table-body');
+                tbody.innerHTML = "";
+                this.state.perfumes.forEach(p => {
+                    tbody.innerHTML += `<tr><td>${p.name}</td><td>${p.brand}</td><td>${p.sellingPrice.toFixed(2)} DH</td><td>${p.currentStock}</td></tr>`;
+                });
+            },
+
+            renderHistory() {
+                const tbody = document.getElementById('history-table-body');
+                tbody.innerHTML = "";
+                [...this.state.sales].reverse().forEach(s => {
+                    tbody.innerHTML += `<tr><td>${s.date}</td><td>${s.operator}</td><td><span class="badge-method badge-${s.method}">${s.method}</span></td><td>${s.total.toFixed(2)} DH</td></tr>`;
+                });
+            },
+
+            renderNotifLogsView() {
+                const container = document.getElementById('notif-logs-archive-container');
+                container.innerHTML = "";
+                db.ref('notif_logs').limitToLast(20).once('value', snapshot => {
+                    const logs = snapshot.val() || {};
+                    Object.values(logs).reverse().forEach(l => {
+                        container.innerHTML += `<div class="notif-log-item ${l.type}"><strong>[${l.date}]</strong> ${l.text}</div>`;
+                    });
+                });
+            },
+
+            clearNotifLogs() {
+                if(confirm("Effacer tout l'historique des notifications Cloud ?")) {
+                    db.ref('notif_logs').remove();
+                    this.renderNotifLogsView();
+                }
+            },
+
+            saveSettingsConfig() {
+                const val = parseInt(document.getElementById('settings-threshold-input').value);
+                db.ref('settingsThreshold').set(val);
+                alert("Configuration synchronisée sur le Cloud !");
+            },
+
+            exportInventoryToExcel() {
+                let data = this.state.perfumes.map(p => ({ "ID": p.id, "Marque": p.brand, "Nom": p.name, "Prix Achat": p.purchasePrice, "Prix Vente": p.sellingPrice, "Stock Restant": p.currentStock }));
+                let ws = XLSX.utils.json_to_sheet(data);
+                let wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Inventaire");
+                XLSX.writeFile(wb, "Maison_De_Parfum_Stock.xlsx");
+            },
+
+            logout() {
+                localStorage.removeItem('mp_session');
+                this.state.activeUser = null;
+                document.getElementById('view-workspace').classList.add('hidden');
+                document.getElementById('view-login').classList.remove('hidden');
+            }
+        };
+
+        window.onload = () => CoreApp.init();
+    </script>
+</body>
+</html>
